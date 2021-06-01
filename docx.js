@@ -22,14 +22,41 @@
   SOFTWARE.
 **/
 
-module.exports = function(RED) {
+const { basename, extname, dirname } = require('path')
+const { readFileSync, writeFileSync } = require('fs')
+const { TemplateHandler } = require('easy-template-x')
+
+const uuid = () => Math.random().toString(36).substr(2, 9)
+
+module.exports = function (RED) {
   function docx(config) {
     RED.nodes.createNode(this, config)
     const self = this
-    this.on("input", (msg) => {
-      thisNode.send(msg)
+    this.on("input", async (msg) => {
+      const handler = new TemplateHandler()
+      const templateFile = readFileSync(`/data/${config.templatePath}`)
+      const templateFileName = basename(`/data/${config.templatePath}`, extname(config.templatePath))
+      const doc = await handler.process(templateFile, msg.payload.docx)
+
+      msg.payload.docx = { ...msg.payload.docx, templateFileName }
+      if (config.outputPath.indexOf('${') > -1) {
+        for (let key of Object.keys(msg.payload)) {
+          config.outputPath = config.outputPath.replace('${' + key + '}', msg.payload[key])
+        }
+        for (let key of Object.keys(msg.payload.docx)) {
+          config.outputPath = config.outputPath.replace('${' + key + '}', msg.payload.docx[key])
+        }
+      }
+
+      if (config.outputPath.indexOf('docx') === -1) {
+        config.outputPath = `${config.outputPath}/${templateFileName}_${config.id}_${uuid()}.docx`
+      }
+
+      writeFileSync(`/data/${config.outputPath}`, doc)
+      msg.payload.docx = { ...msg.payload.docx, ...config, templateFileName }
+      self.send(msg)
     })
   }
-  
+
   RED.nodes.registerType("docx", docx)
 }
