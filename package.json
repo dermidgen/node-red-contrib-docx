@@ -1,0 +1,26 @@
+{
+  "name": "node-red-contrib-docx",
+  "version": "0.0.1",
+  "description": "Nodes for producing or manipulating docx files from Node-RED.",
+  "license": "MIT",
+  "dependencies": {
+    "easy-template-x": "^2.0.0"
+  },
+  "author": "Danny Graham <good.midget@gmail.com>",
+  "keywords": [
+    "node-red",
+    "docx"
+  ],
+  "node-red": {
+    "nodes": {
+      "docx": "docx.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dermidgen/node-red-contrib-docx"
+  },
+  "engines": {
+    "node": ">=0.10"
+  }
+}
